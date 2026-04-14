@@ -1,29 +1,53 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
+import {useBooksService} from '../books.service';
 import {useBooksSelection} from '../use-books-selection';
 import type {BookModel} from '../../shared/models/BookModel';
 import BooksSelectionToolbar from '../../shared/components/books-selection-toolbar/BooksSelectionToolbar';
+import BooksSearchBar from '../../shared/components/books-search-bar/BooksSearchBar';
 import BookCard from '../../shared/components/book-card/BookCard';
 import './Saved.scss';
 import {useBooksSelectionSelectors} from "../use-books-selection.selectors";
 
 const Saved: React.FC = () => {
+    const {loadSavedBooksFromDatabase, deleteBooksFromDatabase, isOperationLoading} = useBooksService();
     const {dispatch, state} = useBooksSelection();
     const {savedCount} = useBooksSelectionSelectors();
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        dispatch({type: 'SYNC_DRAFT_FROM_SAVED'});
-    }, [dispatch]);
+        void loadSavedBooksFromDatabase().then(savedBooks => {
+            dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+            dispatch({type: 'SYNC_DRAFT_FROM_SAVED'});
+        });
+    }, [dispatch, loadSavedBooksFromDatabase]);
 
     const toggleRemoveSelection = (book: BookModel) => {
         dispatch({type: 'TOGGLE_REMOVE_DRAFT_BOOK', payload: book});
+    };
+
+    const submitSavedSearch = async () => {
+        const savedBooks = await loadSavedBooksFromDatabase(searchTerm);
+        dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+        dispatch({type: 'SYNC_DRAFT_FROM_SAVED'});
     };
 
     const isMarkedForRemoval = (book: BookModel): boolean => {
         return state.removeDraftBooks.some((b) => b.id === book.id);
     };
 
-    const handleUnsaveSelection = () => {
-        dispatch({type: 'UNSAVE_SELECTED_BOOKS'});
+    const handleUnsaveSelection = async () => {
+        if (!state.removeDraftBooks.length || isOperationLoading) {
+            return;
+        }
+
+        const deletedIds = await deleteBooksFromDatabase(state.removeDraftBooks.map(book => book.id));
+        if (!deletedIds.length) {
+            return;
+        }
+
+        const savedBooks = await loadSavedBooksFromDatabase();
+        dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+        dispatch({type: 'SYNC_DRAFT_FROM_SAVED'});
     };
 
     const hasSavedBooks = state.savedBooks.length > 0;
@@ -41,6 +65,13 @@ const Saved: React.FC = () => {
             <p className="books-list__meta mb-4">
                 Total saved books: <strong>{savedCount}</strong>
             </p>
+
+            <BooksSearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSubmit={submitSavedSearch}
+                placeholder="Search saved books..."
+            />
 
             {!hasSavedBooks ? (
                 <div className="loader py-5">No saved books found.</div>

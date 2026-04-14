@@ -13,6 +13,7 @@ export type BooksSelectionAction =
     | { type: 'TOGGLE_REMOVE_DRAFT_BOOK'; payload: BookModel }
     | { type: 'CLEAR_DRAFT_SELECTION' }
     | { type: 'SYNC_DRAFT_FROM_SAVED' }
+    | { type: 'SET_SAVED_BOOKS'; payload: BookModel[] }
     | { type: 'SAVE_SELECTION' }
     | { type: 'UNSAVE_SELECTED_BOOKS' };
 
@@ -56,6 +57,14 @@ export const booksSelectionReducer = (
                 ...state,
                 draftBooks: [...state.savedBooks],
                 removeDraftBooks: [],
+            };
+        case 'SET_SAVED_BOOKS':
+            return {
+                ...state,
+                savedBooks: action.payload,
+                removeDraftBooks: state.removeDraftBooks.filter(book =>
+                    action.payload.some(saved => saved.id === book.id),
+                ),
             };
         case 'SAVE_SELECTION': {
             const savedById = new Map(state.savedBooks.map(book => [book.id, book]));

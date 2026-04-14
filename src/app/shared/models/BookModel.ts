@@ -27,3 +27,27 @@ export interface BookResponseModel {
   previous: string | null;
   results: BookModel[] | null;
 }
+
+export interface SavedBooksResponseModel {
+  data: BookModel[];
+  message: string;
+  success: boolean;
+}
+
+export interface BulkInsertBooksResponseModel {
+  data: {
+    insertedIds: number[];
+    ignoredIds: number[];
+  };
+  message: string;
+  success: boolean;
+}
+
+export interface BulkDeleteBooksResponseModel {
+  data: {
+    deletedIds: number[];
+    notFoundOrIgnored: number[];
+  };
+  message: string;
+  success: boolean;
+}

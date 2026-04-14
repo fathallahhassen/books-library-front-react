@@ -1,12 +1,20 @@
 import {useState, useCallback, useRef} from 'react';
 import axios from 'axios';
 import {apiService} from '../shared/services/api.service';
-import type {BookModel, BookResponseModel} from '../shared/models/BookModel';
+import type {
+    BookModel,
+    BookResponseModel,
+    SavedBooksResponseModel,
+    BulkInsertBooksResponseModel,
+    BulkDeleteBooksResponseModel,
+} from '../shared/models/BookModel';
 import {environment} from '../../environments/environment';
 
 export const useBooksService = () => {
     const [booksList, setBooksList] = useState<BookModel[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [isSavedLoading, setIsSavedLoading] = useState(false);
+    const [isOperationLoading, setIsOperationLoading] = useState(false);
     const [nextUrl, setNextUrl] = useState<string | null>(null);
     const [currentQuery, setCurrentQuery] = useState('');
     const requestVersionRef = useRef(0);
@@ -80,13 +88,77 @@ export const useBooksService = () => {
         loadBooks(true, normalizedQuery);
     }, [currentQuery, booksList.length, resetBooks, loadBooks]);
 
+    const loadSavedBooksFromDatabase = useCallback(async (query?: string): Promise<BookModel[]> => {
+        const normalizedQuery = query?.trim();
+        const hasQuery = Boolean(normalizedQuery);
+        const url = hasQuery
+            ? `${environment.apiLocalDbUrl}/books/search`
+            : `${environment.apiLocalDbUrl}/books`;
+        const params = hasQuery ? {q: normalizedQuery} : undefined;
+
+        setIsSavedLoading(true);
+
+        try {
+            const response = await apiService.get<SavedBooksResponseModel>(url, {params});
+            return response.data.data ?? [];
+        } catch {
+            return [];
+        } finally {
+            setIsSavedLoading(false);
+        }
+    }, []);
+
+    const saveBooksToDatabase = useCallback(async (books: BookModel[]): Promise<number[]> => {
+        if (!books.length || isOperationLoading) {
+            return [];
+        }
+
+        setIsOperationLoading(true);
+        try {
+            const response = await apiService.post<BulkInsertBooksResponseModel>(
+                `${environment.apiLocalDbUrl}/books/bulk-create`,
+                {items: books},
+            );
+            const {insertedIds = [], ignoredIds = []} = response.data.data ?? {};
+            return [...insertedIds, ...ignoredIds];
+        } catch {
+            return [];
+        } finally {
+            setIsOperationLoading(false);
+        }
+    }, [isOperationLoading]);
+
+    const deleteBooksFromDatabase = useCallback(async (bookIds: number[]): Promise<number[]> => {
+        if (!bookIds.length || isOperationLoading) {
+            return [];
+        }
+
+        setIsOperationLoading(true);
+        try {
+            const response = await apiService.post<BulkDeleteBooksResponseModel>(
+                `${environment.apiLocalDbUrl}/books/bulk-delete`,
+                {ids: bookIds},
+            );
+            return response.data.data?.deletedIds ?? [];
+        } catch {
+            return [];
+        } finally {
+            setIsOperationLoading(false);
+        }
+    }, [isOperationLoading]);
+
     return {
         booksList,
         isLoading,
+        isSavedLoading,
+        isOperationLoading,
         hasMore,
         searchBooks,
         loadBooks,
         loadMoreBooks,
+        loadSavedBooksFromDatabase,
+        saveBooksToDatabase,
+        deleteBooksFromDatabase,
     };
 };
 

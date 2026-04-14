@@ -1,13 +1,23 @@
-import React, {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useBooksService} from '../books.service';
 import {useBooksSelection} from '../use-books-selection';
 import type {BookModel} from '../../shared/models/BookModel';
 import BooksSelectionToolbar from '../../shared/components/books-selection-toolbar/BooksSelectionToolbar';
+import BooksSearchBar from '../../shared/components/books-search-bar/BooksSearchBar';
 import BookCard from '../../shared/components/book-card/BookCard';
 import './List.scss';
 
 const List = () => {
-    const {booksList, isLoading, searchBooks, loadBooks, loadMoreBooks} = useBooksService();
+    const {
+        booksList,
+        isLoading,
+        isOperationLoading,
+        searchBooks,
+        loadBooks,
+        loadMoreBooks,
+        loadSavedBooksFromDatabase,
+        saveBooksToDatabase,
+    } = useBooksService();
     const {dispatch, state} = useBooksSelection();
     const [searchTerm, setSearchTerm] = useState('');
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -19,9 +29,13 @@ const List = () => {
         }
 
         hasInitializedRef.current = true;
-        loadBooks(true);
+        void loadBooks(true);
         dispatch({type: 'CLEAR_DRAFT_SELECTION'});
-    }, [dispatch, loadBooks]);
+
+        void loadSavedBooksFromDatabase().then(savedBooks => {
+            dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+        });
+    }, [dispatch, loadBooks, loadSavedBooksFromDatabase]);
 
     useEffect(() => {
         // 1. Capture the current ref value in a variable
@@ -48,16 +62,6 @@ const List = () => {
         searchBooks(searchTerm);
     };
 
-    const handleFilterBooks = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            submitSearch();
-        }
-    };
-
     const selectBook = (book: BookModel) => {
         if (state.savedBooks.some((b) => b.id === book.id)) {
             return;
@@ -76,8 +80,19 @@ const List = () => {
         return state.savedBooks.some((b) => b.id === book.id) ? 'Saved' : 'Selected';
     };
 
-    const handleSaveSelection = () => {
-        dispatch({type: 'SAVE_SELECTION'});
+    const handleSaveSelection = async () => {
+        if (!state.draftBooks.length || isOperationLoading) {
+            return;
+        }
+
+        const savedIds = await saveBooksToDatabase(state.draftBooks);
+        if (!savedIds.length) {
+            return;
+        }
+
+        const savedBooks = await loadSavedBooksFromDatabase();
+        dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+        dispatch({type: 'CLEAR_DRAFT_SELECTION'});
     };
 
     return (
@@ -90,27 +105,12 @@ const List = () => {
                 onSave={handleSaveSelection}
             />
 
-            <div className="books-list__search mb-4">
-                <div className="input-group input-group-lg">
-                    <input
-                        className="form-control"
-                        type="text"
-                        placeholder="Search books..."
-                        value={searchTerm}
-                        onChange={handleFilterBooks}
-                        onKeyDown={handleKeyDown}
-                    />
-                    <button
-                        className="books-list__search-btn btn btn-primary"
-                        type="button"
-                        onClick={submitSearch}
-                        aria-label="Search books"
-                    >
-                        →
-                    </button>
-                </div>
-                <small className="books-list__search-hint">Press Enter or click the arrow to search.</small>
-            </div>
+            <BooksSearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSubmit={submitSearch}
+                placeholder="Search books..."
+            />
 
             {isLoading && !booksList.length ? (
                 <div className="loader py-5">Loading books...</div>

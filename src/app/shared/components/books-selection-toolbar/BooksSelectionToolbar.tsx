@@ -1,4 +1,3 @@
-import React from 'react';
 import {useNavigate} from 'react-router-dom';
 import './BooksSelectionToolbar.scss';
 import {useBooksSelectionSelectors} from "../../../books/use-books-selection.selectors";
@@ -11,14 +10,14 @@ interface BooksSelectionToolbarProps {
     onSave: () => void;
 }
 
-const BooksSelectionToolbar: React.FC<BooksSelectionToolbarProps> =
+const BooksSelectionToolbar =
     ({
          title,
          subtitle,
          saveLabel = 'Save selection',
          saveMode = 'draft',
          onSave,
-     }) => {
+     }: BooksSelectionToolbarProps) => {
         const navigate = useNavigate();
         const {
             savedCount,

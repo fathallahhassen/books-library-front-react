@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useBooksService} from '../books.service';
 import {useBooksSelection} from '../use-books-selection';
 import type {BookModel} from '../../shared/models/BookModel';
@@ -8,7 +8,7 @@ import BookCard from '../../shared/components/book-card/BookCard';
 import './Saved.scss';
 import {useBooksSelectionSelectors} from "../use-books-selection.selectors";
 
-const Saved: React.FC = () => {
+const Saved = () => {
     const {loadSavedBooksFromDatabase, deleteBooksFromDatabase, isOperationLoading} = useBooksService();
     const {dispatch, state} = useBooksSelection();
     const {savedCount} = useBooksSelectionSelectors();
@@ -45,7 +45,7 @@ const Saved: React.FC = () => {
             return;
         }
 
-        const savedBooks = await loadSavedBooksFromDatabase();
+        const savedBooks = await loadSavedBooksFromDatabase(searchTerm);
         dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
         dispatch({type: 'SYNC_DRAFT_FROM_SAVED'});
     };

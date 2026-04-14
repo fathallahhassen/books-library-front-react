@@ -1,6 +1,6 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {useBooksService} from '../books.service';
-import {useBooksSelection} from '../books-selection.store';
+import {useBooksSelection} from '../use-books-selection';
 import type {BookModel} from '../../shared/models/BookModel';
 import BooksSelectionToolbar from '../../shared/components/books-selection-toolbar/BooksSelectionToolbar';
 import BookCard from '../../shared/components/book-card/BookCard';
@@ -24,19 +24,22 @@ const List = () => {
     }, [dispatch, loadBooks]);
 
     useEffect(() => {
-            const observer = new IntersectionObserver((entries) => {
+        // 1. Capture the current ref value in a variable
+        const sentinel = sentinelRef.current;
+
+        const observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
                 loadMoreBooks();
             }
         });
 
-        if (sentinelRef.current) {
-            observer.observe(sentinelRef.current);
+        if (sentinel) {
+            observer.observe(sentinel);
         }
 
         return () => {
-            if (sentinelRef.current) {
-                observer.unobserve(sentinelRef.current);
+            if (sentinel) {
+                observer.unobserve(sentinel);
             }
         };
     }, [loadMoreBooks]);

@@ -1,0 +1,57 @@
+.books-toolbar {
+  padding: 1rem 1.1rem;
+  border: 2px solid #e9ecef;
+  border-radius: 1.25rem;
+  background: linear-gradient(180deg, #fff, #f8f9fa);
+  box-shadow: 0 .5rem 1.2rem rgba(0, 0, 0, .05);
+
+  &__title {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+  }
+
+  &__subtitle {
+    color: #6c757d;
+  }
+
+  &__view,
+  &__save {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 999px;
+    padding: .6rem 1rem;
+    font-weight: 600;
+  }
+
+  &__view {
+    border-width: 2px;
+  }
+
+  &__save:disabled {
+    opacity: .72;
+    cursor: not-allowed;
+  }
+
+  &__badge {
+    position: absolute;
+    top: -.45rem;
+    right: -.45rem;
+    min-width: 1.5rem;
+    height: 1.5rem;
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    background: #dc3545;
+    color: #fff;
+    font-size: .8rem;
+    font-weight: 700;
+
+    &--inline {
+      position: static;
+      min-width: 1.35rem;
+      height: 1.35rem;
+      margin-left: .4rem;
+    }
+  }
+}

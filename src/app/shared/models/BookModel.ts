@@ -6,7 +6,6 @@ type BookEditor = {
 
 export interface BookModel {
   title: string;
-  cover: string;
   id: number,
   authors: BookEditor[],
   summaries: string [],

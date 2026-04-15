@@ -14,8 +14,8 @@ export type BooksSelectionAction =
     | { type: 'CLEAR_DRAFT_SELECTION' }
     | { type: 'SYNC_DRAFT_FROM_SAVED' }
     | { type: 'SET_SAVED_BOOKS'; payload: BookModel[] }
-    | { type: 'SAVE_SELECTION' }
-    | { type: 'UNSAVE_SELECTED_BOOKS' };
+/*    | { type: 'SAVE_SELECTION' }
+    | { type: 'UNSAVE_SELECTED_BOOKS' }*/;
 
 export const initialState: BooksSelectionState = {
     draftBooks: [],
@@ -66,7 +66,7 @@ export const booksSelectionReducer = (
                     action.payload.some(saved => saved.id === book.id),
                 ),
             };
-        case 'SAVE_SELECTION': {
+/*        case 'SAVE_SELECTION': {
             const savedById = new Map(state.savedBooks.map(book => [book.id, book]));
             state.draftBooks.forEach(book => savedById.set(book.id, book));
             return {
@@ -83,7 +83,7 @@ export const booksSelectionReducer = (
                 removeDraftBooks: [],
                 draftBooks: state.savedBooks.filter(book => !toRemove.has(book.id)),
             };
-        }
+        }*/
         default:
             return state;
     }

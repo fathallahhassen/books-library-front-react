@@ -56,6 +56,7 @@ const SavedBooksPage = () => {
                 saveLabel="Unsave selected books"
                 saveMode="saved"
                 onSave={handleUnsaveSelection}
+                isLoading={isOperationLoading}
             />
 
             <p className="books-list__meta mb-4">

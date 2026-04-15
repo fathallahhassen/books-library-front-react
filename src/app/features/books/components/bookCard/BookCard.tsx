@@ -1,5 +1,9 @@
+import React from "react";
+
 import type {BookModel} from '../../../../shared/models/BookModel';
 import './BookCard.scss';
+
+const PLACEHOLDER_COVER = '/public/placeholder-cover.png'; // or a data URI
 
 interface BookCardProps {
     book: BookModel;
@@ -10,16 +14,20 @@ interface BookCardProps {
     onClick: (book: BookModel) => void;
 }
 
-const BookCard = ({
-    book,
-    imageKey = 'image/jpeg',
-    selected = false,
-    selectedLabel = 'Selected',
-    badgeVariant = 'selected',
-    onClick,
-}: BookCardProps) => {
+const BookCard = React.memo(({
+                                 book,
+                                 imageKey = 'image/jpeg',
+                                 selected = false,
+                                 selectedLabel = 'Selected',
+                                 badgeVariant = 'selected',
+                                 onClick,
+                             }: BookCardProps) => {
     const handleClick = () => {
         onClick(book);
+    };
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+        e.currentTarget.src = PLACEHOLDER_COVER;
     };
 
     return (
@@ -30,7 +38,8 @@ const BookCard = ({
             <div className="book-card__cover">
                 <img
                     alt={book.title}
-                    src={book.formats[imageKey]}
+                    src={book.formats?.[imageKey] ?? PLACEHOLDER_COVER}
+                    onError={handleImageError}
                     width="300"
                     height="200"
                 />
@@ -49,6 +58,6 @@ const BookCard = ({
             )}
         </article>
     );
-};
+});
 
 export default BookCard;

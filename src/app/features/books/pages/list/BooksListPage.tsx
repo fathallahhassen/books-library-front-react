@@ -37,21 +37,14 @@ const BooksListPage = () => {
     useEffect(() => {
         const sentinel = sentinelRef.current;
 
+
         const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                loadMoreBooks();
-            }
+            if (entries[0].isIntersecting) loadMoreBooks();
         });
 
-        if (sentinel) {
-            observer.observe(sentinel);
-        }
+        if (sentinel) observer.observe(sentinel);
 
-        return () => {
-            if (sentinel) {
-                observer.unobserve(sentinel);
-            }
-        };
+        return () => observer.disconnect();
     }, [loadMoreBooks]);
 
     const submitSearch = () => {
@@ -99,6 +92,7 @@ const BooksListPage = () => {
                 saveLabel="Save selection"
                 saveMode="draft"
                 onSave={handleSaveSelection}
+                isLoading={isOperationLoading}
             />
 
             <BooksSearchBar

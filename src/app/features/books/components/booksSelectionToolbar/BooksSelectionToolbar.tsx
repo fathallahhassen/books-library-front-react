@@ -8,6 +8,7 @@ interface BooksSelectionToolbarProps {
     saveLabel?: string;
     saveMode?: 'draft' | 'saved';
     onSave: () => void;
+    isLoading?: boolean;
 }
 
 const BooksSelectionToolbar = ({
@@ -16,6 +17,7 @@ const BooksSelectionToolbar = ({
     saveLabel = 'Save selection',
     saveMode = 'draft',
     onSave,
+    isLoading = false,
 }: BooksSelectionToolbarProps) => {
     const navigate = useNavigate();
     const {
@@ -66,11 +68,11 @@ const BooksSelectionToolbar = ({
                 <button
                     className={`books-toolbar__save btn ${saveEnabled ? 'btn-success' : 'btn-secondary'}`}
                     type="button"
-                    disabled={!saveEnabled}
+                    disabled={!saveEnabled || isLoading}
                     onClick={handleSave}
                 >
-                    {saveLabel}
-                    {getBadgeCount() > 0 && (
+                    {isLoading ? 'Saving...' : saveLabel}
+                    {!isLoading && getBadgeCount() > 0 && (
                         <span className="books-toolbar__badge books-toolbar__badge--inline">
                             {getBadgeCount()}
                         </span>

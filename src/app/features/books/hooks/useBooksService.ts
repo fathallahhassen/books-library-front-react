@@ -17,6 +17,7 @@ export const useBooksService = () => {
     const [isOperationLoading, setIsOperationLoading] = useState(false);
     const [nextUrl, setNextUrl] = useState<string | null>(null);
     const [currentQuery, setCurrentQuery] = useState('');
+    const [error, setError] = useState<string | null>(null);
     const requestVersionRef = useRef(0);
     const activeControllerRef = useRef<AbortController | null>(null);
 
@@ -25,6 +26,7 @@ export const useBooksService = () => {
     const resetBooks = useCallback(() => {
         setNextUrl(null);
         setBooksList([]);
+        setError(null);
     }, []);
 
     const loadBooks = useCallback(async (reset = false, queryOverride?: string) => {
@@ -41,6 +43,7 @@ export const useBooksService = () => {
         const controller = new AbortController();
         activeControllerRef.current = controller;
         setIsLoading(true);
+        setError(null);
 
         const useNextUrl = !reset && nextUrl;
         const url = useNextUrl ? nextUrl! : `${environment.apiBaseUrl}/books`;
@@ -54,11 +57,10 @@ export const useBooksService = () => {
             setBooksList(prev => (reset ? results : [...prev, ...results]));
             setNextUrl(response.data.next);
         } catch (error: unknown) {
-            if (axios.isCancel(error)) {
-                return;
-            }
-
+            if (axios.isCancel(error)) return;
             if (newRequestVersion !== requestVersionRef.current) return;
+            console.error('Book operation failed:', error);
+            setError(error instanceof Error ? error.message : 'Unknown error');
         } finally {
             if (activeControllerRef.current === controller) {
                 activeControllerRef.current = null;
@@ -78,7 +80,7 @@ export const useBooksService = () => {
 
     const searchBooks = useCallback((query: string) => {
         const normalizedQuery = query.trim();
-
+        if (normalizedQuery.length < 2 || normalizedQuery.length > 100) return;
         if (normalizedQuery === currentQuery && booksList.length) {
             return;
         }
@@ -152,6 +154,7 @@ export const useBooksService = () => {
         isLoading,
         isSavedLoading,
         isOperationLoading,
+        error,
         hasMore,
         searchBooks,
         loadBooks,

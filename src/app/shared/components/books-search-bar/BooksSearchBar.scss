@@ -1,0 +1,22 @@
+.books-list {
+  &__search {
+    max-width: 32rem;
+  }
+
+  &__search-hint {
+    display: inline-block;
+    margin-top: .5rem;
+    color: #6c757d;
+  }
+
+  &__search-btn {
+    min-width: 3.5rem;
+    font-size: 1.35rem;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  &__sentinel {
+    height: 1px;
+  }
+}

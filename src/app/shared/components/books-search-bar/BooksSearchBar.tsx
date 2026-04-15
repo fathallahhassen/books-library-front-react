@@ -1,4 +1,5 @@
 import React from 'react';
+import './BooksSearchBar.scss'
 
 interface BooksSearchBarProps {
     value: string;

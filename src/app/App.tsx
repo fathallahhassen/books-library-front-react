@@ -7,7 +7,7 @@ const App = () => {
         <BooksSelectionProvider>
             <Router>
                 <Routes>
-                    <BooksRoutes/>
+                    <Route path="/books/*" element={<BooksRoutes/>}/>
                     <Route path="/" element={<Navigate to="/books" replace/>}/>
                     <Route path="*" element={<Navigate to="/books" replace/>}/>
                 </Routes>

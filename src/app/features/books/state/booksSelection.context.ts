@@ -1,6 +1,6 @@
 import {createContext} from 'react';
 import type React from 'react';
-import type {BookModel} from '../shared/models/BookModel';
+import type {BookModel} from '../../../shared/models/BookModel';
 
 export interface BooksSelectionState {
     draftBooks: BookModel[];

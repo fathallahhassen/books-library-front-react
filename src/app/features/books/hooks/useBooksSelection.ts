@@ -1,5 +1,5 @@
 import {useContext} from 'react';
-import {BooksSelectionContext} from './books-selection.context';
+import {BooksSelectionContext} from '../state/booksSelection.context';
 
 export const useBooksSelection = () => {
     const context = useContext(BooksSelectionContext);

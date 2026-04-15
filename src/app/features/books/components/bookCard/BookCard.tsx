@@ -1,4 +1,4 @@
-import type {BookModel} from '../../models/BookModel';
+import type {BookModel} from '../../../../shared/models/BookModel';
 import './BookCard.scss';
 
 interface BookCardProps {
@@ -11,13 +11,13 @@ interface BookCardProps {
 }
 
 const BookCard = ({
-                      book,
-                      imageKey = 'image/jpeg',
-                      selected = false,
-                      selectedLabel = 'Selected',
-                      badgeVariant = 'selected',
-                      onClick,
-                  }: BookCardProps) => {
+    book,
+    imageKey = 'image/jpeg',
+    selected = false,
+    selectedLabel = 'Selected',
+    badgeVariant = 'selected',
+    onClick,
+}: BookCardProps) => {
     const handleClick = () => {
         onClick(book);
     };
@@ -44,12 +44,11 @@ const BookCard = ({
                 <span
                     className={`book-card__badge book-card__badge--${badgeVariant}`}
                 >
-          {selectedLabel}
-        </span>
+                    {selectedLabel}
+                </span>
             )}
         </article>
     );
 };
 
 export default BookCard;
-

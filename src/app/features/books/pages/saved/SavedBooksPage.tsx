@@ -1,14 +1,10 @@
 import {useEffect, useState} from 'react';
-import {useBooksService} from '../books.service';
-import {useBooksSelection} from '../use-books-selection';
-import type {BookModel} from '../../shared/models/BookModel';
-import BooksSelectionToolbar from '../../shared/components/books-selection-toolbar/BooksSelectionToolbar';
-import BooksSearchBar from '../../shared/components/books-search-bar/BooksSearchBar';
-import BookCard from '../../shared/components/book-card/BookCard';
-import './Saved.scss';
-import {useBooksSelectionSelectors} from "../use-books-selection.selectors";
+import {useBooksService, useBooksSelection, useBooksSelectionSelectors} from '../../hooks';
+import type {BookModel} from '../../../../shared/models/BookModel';
+import {BookCard, BooksSearchBar, BooksSelectionToolbar} from '../../components';
+import './SavedBooksPage.scss';
 
-const Saved = () => {
+const SavedBooksPage = () => {
     const {loadSavedBooksFromDatabase, deleteBooksFromDatabase, isOperationLoading} = useBooksService();
     const {dispatch, state} = useBooksSelection();
     const {savedCount} = useBooksSelectionSelectors();
@@ -94,5 +90,4 @@ const Saved = () => {
     );
 };
 
-export default Saved;
-
+export default SavedBooksPage;

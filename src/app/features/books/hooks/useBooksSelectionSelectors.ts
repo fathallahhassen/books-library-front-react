@@ -1,5 +1,5 @@
-import type {BookModel} from '../shared/models/BookModel';
-import {useBooksSelection} from './use-books-selection';
+import type {BookModel} from '../../../shared/models/BookModel';
+import {useBooksSelection} from './useBooksSelection';
 
 export const useBooksSelectionSelectors = () => {
     const {state} = useBooksSelection();

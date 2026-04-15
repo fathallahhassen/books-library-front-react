@@ -1,14 +1,14 @@
 import {useState, useCallback, useRef} from 'react';
 import axios from 'axios';
-import {apiService} from '../shared/services/api.service';
+import {apiService} from '../../../core/services/api.service';
 import type {
     BookModel,
     BookResponseModel,
     SavedBooksResponseModel,
     BulkInsertBooksResponseModel,
     BulkDeleteBooksResponseModel,
-} from '../shared/models/BookModel';
-import {environment} from '../../environments/environment';
+} from '../../../shared/models/BookModel';
+import {environment} from '../../../../environments/environment';
 
 export const useBooksService = () => {
     const [booksList, setBooksList] = useState<BookModel[]>([]);
@@ -51,7 +51,7 @@ export const useBooksService = () => {
             const response = await apiService.get<BookResponseModel>(url, {params, signal: controller.signal});
             if (newRequestVersion !== requestVersionRef.current) return;
             const results = response.data.results ?? [];
-            setBooksList(prev => reset ? results : [...prev, ...results]);
+            setBooksList(prev => (reset ? results : [...prev, ...results]));
             setNextUrl(response.data.next);
         } catch (error: unknown) {
             if (axios.isCancel(error)) {
@@ -161,4 +161,3 @@ export const useBooksService = () => {
         deleteBooksFromDatabase,
     };
 };
-

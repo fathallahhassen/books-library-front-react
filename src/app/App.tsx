@@ -1,7 +1,5 @@
 import {BrowserRouter as Router, Routes, Route, Navigate} from 'react-router-dom';
-import {BooksSelectionProvider} from './books/books-selection.store';
-import List from './books/list/List';
-import Saved from './books/saved/Saved';
+import {BooksSelectionProvider, BooksRoutes} from './features/books';
 import './App.scss';
 
 const App = () => {
@@ -9,8 +7,7 @@ const App = () => {
         <BooksSelectionProvider>
             <Router>
                 <Routes>
-                    <Route path="/books" element={<List/>}/>
-                    <Route path="/books/saved" element={<Saved/>}/>
+                    <BooksRoutes/>
                     <Route path="/" element={<Navigate to="/books" replace/>}/>
                     <Route path="*" element={<Navigate to="/books" replace/>}/>
                 </Routes>

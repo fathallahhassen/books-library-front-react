@@ -1,5 +1,5 @@
 import React from 'react';
-import './BooksSearchBar.scss'
+import './BooksSearchBar.scss';
 
 interface BooksSearchBarProps {
     value: string;
@@ -9,11 +9,11 @@ interface BooksSearchBarProps {
 }
 
 const BooksSearchBar = ({
-                            value,
-                            onChange,
-                            onSubmit,
-                            placeholder = 'Search books...',
-                        }: BooksSearchBarProps) => {
+    value,
+    onChange,
+    onSubmit,
+    placeholder = 'Search books...',
+}: BooksSearchBarProps) => {
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
             onSubmit();

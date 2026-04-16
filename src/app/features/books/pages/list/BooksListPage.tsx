@@ -1,13 +1,20 @@
-import React, {useEffect, useRef, useState} from 'react';
-import {useBooksService} from '../books.service';
-import {useBooksSelection} from '../books-selection.store';
-import type {BookModel} from '../../shared/models/BookModel';
-import BooksSelectionToolbar from '../../shared/components/books-selection-toolbar/BooksSelectionToolbar';
-import BookCard from '../../shared/components/book-card/BookCard';
-import './List.scss';
+import {useEffect, useRef, useState} from 'react';
+import {useBooksService, useBooksSelection} from '../../hooks';
+import type {BookModel} from '../../../../shared/models/BookModel';
+import {BookCard, BooksSearchBar, BooksSelectionToolbar} from '../../components';
+import './BooksListPage.scss';
 
-const List = () => {
-    const {booksList, isLoading, searchBooks, loadBooks, loadMoreBooks} = useBooksService();
+const BooksListPage = () => {
+    const {
+        booksList,
+        isLoading,
+        isOperationLoading,
+        searchBooks,
+        loadBooks,
+        loadMoreBooks,
+        loadSavedBooksFromDatabase,
+        saveBooksToDatabase,
+    } = useBooksService();
     const {dispatch, state} = useBooksSelection();
     const [searchTerm, setSearchTerm] = useState('');
     const sentinelRef = useRef<HTMLDivElement>(null);
@@ -19,40 +26,29 @@ const List = () => {
         }
 
         hasInitializedRef.current = true;
-        loadBooks(true);
+        void loadBooks(true);
         dispatch({type: 'CLEAR_DRAFT_SELECTION'});
-    }, [dispatch, loadBooks]);
+
+        void loadSavedBooksFromDatabase().then(savedBooks => {
+            dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+        });
+    }, [dispatch, loadBooks, loadSavedBooksFromDatabase]);
 
     useEffect(() => {
-            const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting) {
-                loadMoreBooks();
-            }
+        const sentinel = sentinelRef.current;
+
+
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) loadMoreBooks();
         });
 
-        if (sentinelRef.current) {
-            observer.observe(sentinelRef.current);
-        }
+        if (sentinel) observer.observe(sentinel);
 
-        return () => {
-            if (sentinelRef.current) {
-                observer.unobserve(sentinelRef.current);
-            }
-        };
+        return () => observer.disconnect();
     }, [loadMoreBooks]);
 
     const submitSearch = () => {
         searchBooks(searchTerm);
-    };
-
-    const handleFilterBooks = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setSearchTerm(e.target.value);
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Enter') {
-            submitSearch();
-        }
     };
 
     const selectBook = (book: BookModel) => {
@@ -73,8 +69,19 @@ const List = () => {
         return state.savedBooks.some((b) => b.id === book.id) ? 'Saved' : 'Selected';
     };
 
-    const handleSaveSelection = () => {
-        dispatch({type: 'SAVE_SELECTION'});
+    const handleSaveSelection = async () => {
+        if (!state.draftBooks.length || isOperationLoading) {
+            return;
+        }
+
+        const savedIds = await saveBooksToDatabase(state.draftBooks);
+        if (!savedIds.length) {
+            return;
+        }
+
+        const savedBooks = await loadSavedBooksFromDatabase();
+        dispatch({type: 'SET_SAVED_BOOKS', payload: savedBooks});
+        dispatch({type: 'CLEAR_DRAFT_SELECTION'});
     };
 
     return (
@@ -85,29 +92,15 @@ const List = () => {
                 saveLabel="Save selection"
                 saveMode="draft"
                 onSave={handleSaveSelection}
+                isLoading={isOperationLoading}
             />
 
-            <div className="books-list__search mb-4">
-                <div className="input-group input-group-lg">
-                    <input
-                        className="form-control"
-                        type="text"
-                        placeholder="Search books..."
-                        value={searchTerm}
-                        onChange={handleFilterBooks}
-                        onKeyDown={handleKeyDown}
-                    />
-                    <button
-                        className="books-list__search-btn btn btn-primary"
-                        type="button"
-                        onClick={submitSearch}
-                        aria-label="Search books"
-                    >
-                        →
-                    </button>
-                </div>
-                <small className="books-list__search-hint">Press Enter or click the arrow to search.</small>
-            </div>
+            <BooksSearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                onSubmit={submitSearch}
+                placeholder="Search books..."
+            />
 
             {isLoading && !booksList.length ? (
                 <div className="loader py-5">Loading books...</div>
@@ -136,6 +129,4 @@ const List = () => {
     );
 };
 
-export default List;
-
-
+export default BooksListPage;

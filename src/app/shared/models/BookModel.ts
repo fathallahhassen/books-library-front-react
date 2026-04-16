@@ -6,7 +6,6 @@ type BookEditor = {
 
 export interface BookModel {
   title: string;
-  cover: string;
   id: number,
   authors: BookEditor[],
   summaries: string [],
@@ -26,4 +25,28 @@ export interface BookResponseModel {
   next: string | null;
   previous: string | null;
   results: BookModel[] | null;
+}
+
+export interface SavedBooksResponseModel {
+  data: BookModel[];
+  message: string;
+  success: boolean;
+}
+
+export interface BulkInsertBooksResponseModel {
+  data: {
+    insertedIds: number[];
+    ignoredIds: number[];
+  };
+  message: string;
+  success: boolean;
+}
+
+export interface BulkDeleteBooksResponseModel {
+  data: {
+    deletedIds: number[];
+    notFoundOrIgnored: number[];
+  };
+  message: string;
+  success: boolean;
 }

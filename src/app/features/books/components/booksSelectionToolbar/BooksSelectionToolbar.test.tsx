@@ -1,10 +1,11 @@
-import {describe, it, expect, vi} from 'vitest'
+import type {ReactElement} from 'react'
+import {describe, it, expect} from 'vitest'
 import {render, screen} from '@testing-library/react'
 import {BrowserRouter} from 'react-router-dom'
 import {BooksSelectionProvider} from '../../state'
 import BooksSelectionToolbar from './BooksSelectionToolbar'
 
-const renderWithProvider = (component: React.ReactElement) => {
+const renderWithProvider = (component: ReactElement) => {
     return render(
         <BrowserRouter>
             <BooksSelectionProvider>
@@ -20,7 +21,8 @@ describe('BooksSelectionToolbar', () => {
             <BooksSelectionToolbar
                 title="Test Title"
                 subtitle="Test Subtitle"
-                onSave={() => {}}
+                onSave={() => {
+                }}
             />
         )
         expect(screen.getByText('Test Title')).toBeInTheDocument()
@@ -33,7 +35,8 @@ describe('BooksSelectionToolbar', () => {
                 title="Test"
                 subtitle="Test"
                 saveLabel="Save Books"
-                onSave={() => {}}
+                onSave={() => {
+                }}
             />
         )
         expect(screen.getByRole('button', {name: /Save Books/i})).toBeInTheDocument()
@@ -44,7 +47,8 @@ describe('BooksSelectionToolbar', () => {
             <BooksSelectionToolbar
                 title="Test"
                 subtitle="Test"
-                onSave={() => {}}
+                onSave={() => {
+                }}
             />
         )
         expect(screen.getByRole('button', {name: /Save selection/i})).toBeDisabled()
@@ -55,22 +59,25 @@ describe('BooksSelectionToolbar', () => {
             <BooksSelectionToolbar
                 title="Test"
                 subtitle="Test"
-                onSave={() => {}}
+                onSave={() => {
+                }}
                 isLoading={true}
             />
         )
         expect(screen.getByText('Saving...')).toBeInTheDocument()
     })
-
-    it('calls onSave when save button clicked', () => {
-        const onSave = vi.fn()
-        renderWithProvider(
-            <BooksSelectionToolbar
-                title="Test"
-                subtitle="Test"
-                onSave={onSave}
-            />
-        )
-        // Button is disabled without selection, so let's mock the context state
-    })
+    it.todo('calls onSave when save button clicked')
+    // This test currently has no interaction or assertion, so it passes even if onSave is broken.
+    // Seed the selection context and click the enabled button
+    /*    it('calls onSave when save button clicked', () => {
+            const onSave = vi.fn()
+            renderWithProvider(
+                <BooksSelectionToolbar
+                    title="Test"
+                    subtitle="Test"
+                    onSave={onSave}
+                />
+            )
+            // Button is disabled without selection, so let's mock the context state
+        })*/
 })

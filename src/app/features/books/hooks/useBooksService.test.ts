@@ -1,16 +1,19 @@
 import {describe, it, expect, vi} from 'vitest'
 import {renderHook, act} from '@testing-library/react'
 import {useBooksService} from './useBooksService'
+import {apiService} from "../../../core/services/api.service.ts";
+import {AxiosHeaders} from 'axios';
 
 // Mock axios
 vi.mock('axios', () => ({
     default: {
         isCancel: vi.fn(() => false),
     },
+    AxiosHeaders: class {},
 }))
 
 // Mock api service
-vi.mock('../../core/services/api.service', () => ({
+vi.mock('../../../core/services/api.service', () => ({
     apiService: {
         get: vi.fn(),
         post: vi.fn(),
@@ -33,20 +36,46 @@ describe('useBooksService', () => {
         expect(result.current.hasMore).toBe(false)
     })
 
-    it('resetBooks clears state', async () => {
+    it('searchBooks resets booksList and re-populates on a new search', async () => {
+        const firstResults = [{id: 1, title: 'React Book'}]
+        const secondResults = [{id: 2, title: 'Angular Book'}]
+
+        // First call returns firstResults, second call returns secondResults
+        vi.mocked(apiService.get)
+            .mockResolvedValueOnce({
+                data: {results: firstResults, next: null},
+                status: 200,
+                statusText: 'OK',
+                headers: new AxiosHeaders(),
+                config: {headers: new AxiosHeaders()}
+            })
+            .mockResolvedValueOnce({
+                data: {results: secondResults, next: null},
+                status: 200,
+                statusText: 'OK',
+                headers: new AxiosHeaders(),
+                config: {headers: new AxiosHeaders()}
+            })
+
         const {result} = renderHook(() => useBooksService())
-        
-        // Access internal reset function via act - the hook exposes it internally
-        act(() => {
-            // resetBooks is internal, so we test searchBooks which calls it
+
+        // First search – populates booksList
+        await act(async () => {
+            result.current.searchBooks('react')
         })
-        
-        expect(result.current.booksList).toEqual([])
+        expect(result.current.booksList).toEqual(firstResults)
+
+        // Second search with a different query –
+        // internally calls resetBooks() (clears state), then loadBooks() (refills)
+        await act(async () => {
+            result.current.searchBooks('angular')
+        })
+        expect(result.current.booksList).toEqual(secondResults)
     })
 
     it('has expected return shape', () => {
         const {result} = renderHook(() => useBooksService())
-        const keys = Object.keys(result.current).sort()
+        const keys = Object.keys(result.current)
         expect(keys).toContain('booksList')
         expect(keys).toContain('isLoading')
         expect(keys).toContain('isSavedLoading')

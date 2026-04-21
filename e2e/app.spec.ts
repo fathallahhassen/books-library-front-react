@@ -8,7 +8,7 @@ test.describe('Books Library App', () => {
 
     test('shows books list page', async ({page}) => {
         await page.goto('/');
-        await expect(page.getByRole('heading', {name: /Books/i})).toBeVisible();
+        await expect(page.getByRole('heading', {name: /^Books$/i})).toBeVisible();
     });
 
     test('search bar is present', async ({page}) => {
